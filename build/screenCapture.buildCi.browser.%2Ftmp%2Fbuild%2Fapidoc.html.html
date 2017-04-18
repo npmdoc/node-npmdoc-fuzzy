@@ -92,6 +92,58 @@
 
     </ol></li>
 
+    <li class="apidocModuleLi"><a href="#apidoc.module.fuzzy.filter">module fuzzy.filter</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.fuzzy.filter.filter">
+            function <span class="apidocSignatureSpan">fuzzy.</span>filter
+            <span class="apidocSignatureSpan">(pattern, arr, opts)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.fuzzy.match">module fuzzy.match</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.fuzzy.match.match">
+            function <span class="apidocSignatureSpan">fuzzy.</span>match
+            <span class="apidocSignatureSpan">(pattern, str, opts)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.fuzzy.simpleFilter">module fuzzy.simpleFilter</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.fuzzy.simpleFilter.simpleFilter">
+            function <span class="apidocSignatureSpan">fuzzy.</span>simpleFilter
+            <span class="apidocSignatureSpan">(pattern, array)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.fuzzy.test">module fuzzy.test</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.fuzzy.test.test">
+            function <span class="apidocSignatureSpan">fuzzy.</span>test
+            <span class="apidocSignatureSpan">(pattern, str)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
 </ol></div>
 
 <div class="apidocSectionDiv">
@@ -235,6 +287,176 @@ Jedi: Wrap matching characters in each string
 
     <h2>
         <a href="#apidoc.element.fuzzy.test" id="apidoc.element.fuzzy.test">
+        function <span class="apidocSignatureSpan">fuzzy.</span>test
+        <span class="apidocSignatureSpan">(pattern, str)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">test = function (pattern, str) {
+  return fuzzy.match(pattern, str) !== null;
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.fuzzy.filter" id="apidoc.module.fuzzy.filter">module fuzzy.filter</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.fuzzy.filter.filter" id="apidoc.element.fuzzy.filter.filter">
+        function <span class="apidocSignatureSpan">fuzzy.</span>filter
+        <span class="apidocSignatureSpan">(pattern, arr, opts)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">filter = function (pattern, arr, opts) {
+  if(!arr || arr.length === 0) {
+    return [];
+  }
+  if (typeof pattern !== 'string') {
+    return arr;
+  }
+  opts = opts || {};
+  return arr
+    .reduce(function(prev, element, idx, arr) {
+      var str = element;
+      if(opts.extract) {
+        str = opts.extract(element);
+      }
+      var rendered = fuzzy.match(pattern, str, opts);
+      if(rendered != null) {
+        prev[prev.length] = {
+            string: rendered.rendered
+          , score: rendered.score
+          , index: idx
+          , original: element
+        };
+      }
+      return prev;
+    }, [])
+
+    // Sort by score. Browsers are inconsistent wrt stable/unstable
+    // sorting, so force stable by using the index in the case of tie.
+    // See http://ofb.net/~sethml/is-sort-stable.html
+    .sort(function(a,b) {
+      var compare = b.score - a.score;
+      if(compare) return compare;
+      return a.index - b.index;
+    });
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+
+## Use it
+
+Padawan: Simply filter an array of strings.
+
+```javascript
+var list = ['baconing', 'narwhal', 'a mighty bear canoe'];
+var results = fuzzy.<span class="apidocCodeKeywordSpan">filter</span>('bcn', list)
+var matches = results.map(function(el) { return el.string; });
+console.log(matches);
+// [ 'baconing', 'a mighty bear canoe' ]
+```
+
+Jedi: Wrap matching characters in each string
+...</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.fuzzy.match" id="apidoc.module.fuzzy.match">module fuzzy.match</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.fuzzy.match.match" id="apidoc.element.fuzzy.match.match">
+        function <span class="apidocSignatureSpan">fuzzy.</span>match
+        <span class="apidocSignatureSpan">(pattern, str, opts)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">match = function (pattern, str, opts) {
+  opts = opts || {};
+  var patternIdx = 0
+    , result = []
+    , len = str.length
+    , totalScore = 0
+    , currScore = 0
+    // prefix
+    , pre = opts.pre || ''
+    // suffix
+    , post = opts.post || ''
+    // String to compare against. This might be a lowercase version of the
+    // raw string
+    , compareString =  opts.caseSensitive &amp;&amp; str || str.toLowerCase()
+    , ch;
+
+  pattern = opts.caseSensitive &amp;&amp; pattern || pattern.toLowerCase();
+
+  // For each character in the string, either add it to the result
+  // or wrap in template if it's the next string in the pattern
+  for(var idx = 0; idx &lt; len; idx++) {
+    ch = str[idx];
+    if(compareString[idx] === pattern[patternIdx]) {
+      ch = pre + ch + post;
+      patternIdx += 1;
+
+      // consecutive characters should increase the score more than linearly
+      currScore += 1 + currScore;
+    } else {
+      currScore = 0;
+    }
+    totalScore += currScore;
+    result[result.length] = ch;
+  }
+
+  // return rendered string if we have a match for every char
+  if(patternIdx === pattern.length) {
+    // if the string is an exact match with pattern, totalScore should be maxed
+    totalScore = (compareString === pattern) ? Infinity : totalScore;
+    return {rendered: result.join(''), score: totalScore};
+  }
+
+  return null;
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.fuzzy.simpleFilter" id="apidoc.module.fuzzy.simpleFilter">module fuzzy.simpleFilter</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.fuzzy.simpleFilter.simpleFilter" id="apidoc.element.fuzzy.simpleFilter.simpleFilter">
+        function <span class="apidocSignatureSpan">fuzzy.</span>simpleFilter
+        <span class="apidocSignatureSpan">(pattern, array)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">simpleFilter = function (pattern, array) {
+  return array.filter(function(str) {
+    return fuzzy.test(pattern, str);
+  });
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.fuzzy.test" id="apidoc.module.fuzzy.test">module fuzzy.test</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.fuzzy.test.test" id="apidoc.element.fuzzy.test.test">
         function <span class="apidocSignatureSpan">fuzzy.</span>test
         <span class="apidocSignatureSpan">(pattern, str)</span>
         </a>
