@@ -211,7 +211,23 @@ Jedi: Wrap matching characters in each string
 
   return null;
 }</pre></li>
-    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+return array.filter(function(str) {
+  return fuzzy.test(pattern, str);
+});
+};
+
+// Does `pattern` fuzzy match `str`?
+fuzzy.test = function(pattern, str) {
+return fuzzy.<span class="apidocCodeKeywordSpan">match</span>(pattern, str) !== null;
+};
+
+// If `pattern` matches `str`, wrap each matching character
+// in `opts.pre` and `opts.post`. If no match, return null
+fuzzy.match = function(pattern, str, opts) {
+opts = opts || {};
+var patternIdx = 0
+...</pre></li>
     </ul>
 
 
@@ -243,7 +259,23 @@ Jedi: Wrap matching characters in each string
     <li>description and source-code<pre class="apidocCodePre">test = function (pattern, str) {
   return fuzzy.match(pattern, str) !== null;
 }</pre></li>
-    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+  root.fuzzy = fuzzy;
+}
+
+// Return all elements of `array` that have a fuzzy
+// match against `pattern`.
+fuzzy.simpleFilter = function(pattern, array) {
+  return array.filter(function(str) {
+    return fuzzy.<span class="apidocCodeKeywordSpan">test</span>(pattern, str);
+  });
+};
+
+// Does `pattern` fuzzy match `str`?
+fuzzy.test = function(pattern, str) {
+  return fuzzy.match(pattern, str) !== null;
+};
+...</pre></li>
     </ul>
 
 
