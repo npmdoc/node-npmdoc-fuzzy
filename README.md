@@ -1,6 +1,6 @@
 # npmdoc-fuzzy
 
-#### api documentation for  [fuzzy (v0.1.3)](https://github.com/mattyork/fuzzy)  [![npm package](https://img.shields.io/npm/v/npmdoc-fuzzy.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-fuzzy) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-fuzzy.svg)](https://travis-ci.org/npmdoc/node-npmdoc-fuzzy)
+#### basic api documentation for  [fuzzy (v0.1.3)](https://github.com/mattyork/fuzzy)  [![npm package](https://img.shields.io/npm/v/npmdoc-fuzzy.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-fuzzy) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-fuzzy.svg)](https://travis-ci.org/npmdoc/node-npmdoc-fuzzy)
 
 #### small, standalone fuzzy search / fuzzy filter. browser or node
 
@@ -76,7 +76,8 @@
         "test": "mocha"
     },
     "typings": "lib/fuzzy",
-    "version": "0.1.3"
+    "version": "0.1.3",
+    "bin": {}
 }
 ```
 
